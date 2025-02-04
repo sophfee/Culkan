@@ -38,10 +38,20 @@ int main()
 {
 	Instance &instance = Singleton<Instance>::GetInstance();
     //instance.AddAllExtensions();
-	instance.AddRequiredExtensions();
+	//instance.AddRequiredExtensions();
+
+	const char *extension1 = VK_KHR_SURFACE_EXTENSION_NAME;
+	const char *extension2 = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
+
+	instance.AddExtension(extension1);
+	instance.AddExtension(extension2);
+
+	instance.SetAppName("Vulkan Program");
+	//instance.AddExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	instance.Create();
 
 	Vec<Ref<PhysicalDevice>> ppPhysicalDevices = instance.GetPhysicalDevices();
+
 	Ref<PhysicalDevice> pPhysicalDevice = ppPhysicalDevices[0];
 	u32 score = 0;
 	for (auto &pPhysicalDevice : ppPhysicalDevices)
@@ -53,6 +63,11 @@ int main()
 			score = testScore;
 		}
 	}
+
+	//
+	auto features = pPhysicalDevice->GetFeatures();
+	pPhysicalDevice
+		->FindQueueFamilies();
 
 	// Create the device
 	Ref<Device> pDevice = pPhysicalDevice->CreateDevice();

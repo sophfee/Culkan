@@ -11,6 +11,10 @@ private:
 	VkInstance pVkInstance;
 	GLFWwindow *pWindow;
 
+#ifdef _DEBUG
+	VkDebugUtilsMessengerEXT pDebugMessenger;
+#endif
+
 	string sAppName;
 
 	Vec<const char *> pArrLayers;
@@ -23,6 +27,9 @@ public:
 
 public:
 
+	// PFN_vkDebugUtilsMessengerCallbackEXT pfnUserCallback;
+	static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
+	
 	// Create the Vulkan instance
 	void Create();
 	void AddLayer(string layer);

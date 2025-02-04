@@ -23,9 +23,9 @@ Device::~Device()
 
 void Device::Create()
 {
-	const QueueFamilyIndices &queueFamilyIndices = pPhysicalDevice.GetQueueFamilyIndices();
+	const QueueFamilyIndices &queueFamilyIndices = sQueueFamilyIndices;
 
-	Vec<VkDeviceQueueCreateInfo> queueCreateInfos;
+	Vec<VkDeviceQueueCreateInfo> queueCreateInfos{};
 	Set<u32> uniqueQueueFamilies = { queueFamilyIndices.graphicsFamily, queueFamilyIndices.presentFamily };
 
 	// The queue priority is a floating point value between 0.0 and 1.0
@@ -38,28 +38,37 @@ void Device::Create()
 		queueCreateInfo.queueFamilyIndex = queueFamily;
 		queueCreateInfo.queueCount = 1;
 		queueCreateInfo.pQueuePriorities = &queuePriority;
+		
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 
-	VkPhysicalDeviceFeatures deviceFeatures = pPhysicalDevice.GetFeatures();
+	VkPhysicalDeviceFeatures deviceFeatures = {};// pPhysicalDevice.GetFeatures();
 
 	Instance &instance = Singleton<Instance>::GetInstance();
 	const Vec<const char *> &deviceExtensions = instance.GetDeviceExtensions();
 
+
 	VkDeviceCreateInfo deviceCreateInfo = {};
 	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	
+	const char *layers[] = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+
+	deviceCreateInfo.enabledLayerCount = 1;
+	deviceCreateInfo.ppEnabledLayerNames = layers;
+
+	deviceCreateInfo.queueCreateInfoCount = 2;
 	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
-	deviceCreateInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
+
+	//deviceCreateInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-
-	u32 deviceExtensionCount = 0;
-	const char **deviceExtensionNames = glfwGetRequiredInstanceExtensions(&deviceExtensionCount);
-
-	deviceCreateInfo.enabledExtensionCount = deviceExtensionCount;
-	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionNames;
-
-	VK_CHECK_RESULT(vkCreateDevice(pPhysicalDevice.GetVkNative(), &deviceCreateInfo, nullptr, &pVkDevice));
-
+	deviceCreateInfo.enabledExtensionCount = static_cast<u32>(deviceExtensions.size());
+	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+	VkResult res = (vkCreateDevice(pPhysicalDevice.GetVkNative(), &deviceCreateInfo, nullptr, &pVkDevice));
+	if (res != VK_SUCCESS) {
+		throw runtime_error("Vulkan error: " + to_string(res));
+	}
 	vkGetDeviceQueue(pVkDevice, queueFamilyIndices.graphicsFamily, 0, &pGraphicsQueue);
 	vkGetDeviceQueue(pVkDevice, queueFamilyIndices.presentFamily, 0, &pPresentQueue);
 

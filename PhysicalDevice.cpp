@@ -145,8 +145,6 @@ u32 PhysicalDevice::RateSuitability() const
 
 Ref<Device> PhysicalDevice::CreateDevice()
 {
-	auto queueFamilyIndices = GetQueueFamilyIndices();
-	auto queueFamilyProperties = GetQueueFamilyProperties();
 	Device *pDevice = new Device(*this);
 	pDevice->Create();
 	return Ref<Device>(pDevice);
