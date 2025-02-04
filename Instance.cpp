@@ -56,13 +56,7 @@ void Instance::Create()
 
 #if defined(_DEBUG)
 
-	pArrLayers.push_back("VK_LAYER_LUNARG_standard_validation");
-	pArrLayers.push_back("VK_LAYER_LUNARG_parameter_validation");
-	pArrLayers.push_back("VK_LAYER_LUNARG_object_tracker");
-	pArrLayers.push_back("VK_LAYER_LUNARG_core_validation");
-	pArrLayers.push_back("VK_LAYER_LUNARG_image");
-	pArrLayers.push_back("VK_LAYER_LUNARG_swapchain");
-	pArrLayers.push_back("VK_LAYER_GOOGLE_threading");
+	pArrLayers.push_back("VK_LAYER_KHRONOS_validation");
 
 #endif
 
@@ -87,6 +81,20 @@ void Instance::AddLayer(string layer)
 void Instance::AddExtension(string extension)
 {
 	pArrExtensions.push_back(extension.c_str());
+}
+
+void Instance::AddRequiredExtensions()
+{
+	u32 glfwExtensionCount = 0;
+	const char **glfwExtensions;
+	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	pArrExtensions.resize(glfwExtensionCount);
+
+	for (u32 i = 0; i < glfwExtensionCount; i++)
+	{
+		pArrExtensions.push_back(glfwExtensions[i]);
+	}
 }
 
 void Instance::AddAllExtensions()
@@ -127,4 +135,9 @@ const Vec<const char *> &Instance::GetDeviceLayers() const
 VkInstance Instance::GetVkNative() const
 {
 	return pVkInstance;
+}
+
+GLFWwindow *Instance::GetWindow() const
+{
+	return pWindow;
 }

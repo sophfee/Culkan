@@ -27,6 +27,7 @@ public:
 	void Create();
 	void AddLayer(string layer);
 	void AddExtension(string extension);
+	void AddRequiredExtensions();
 
 	Vec<VkExtensionProperties> GetAvailableExtensions()
 	{
@@ -38,9 +39,13 @@ public:
 
 	Vec<Ref<PhysicalDevice>> GetPhysicalDevices();
 
+
 	const Vec<const char *> &GetDeviceExtensions() const;
 	const Vec<const char *> &GetDeviceLayers() const;
 
 	// Get the Vulkan instance
 	VkInstance GetVkNative() const;
+
+	// Get the window
+	GLFWwindow *GetWindow() const;
 };

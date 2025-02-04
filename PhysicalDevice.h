@@ -7,6 +7,8 @@ class Device;
 
 class PhysicalDevice : public NonCopyable
 {
+public:
+
 private:
 	VkPhysicalDevice pPhysicalDevice;
 	QueueFamilyIndices sQueueFamilyIndices;

@@ -51,8 +51,12 @@ void Device::Create()
 	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 	deviceCreateInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-	deviceCreateInfo.enabledExtensionCount = static_cast<u32>(deviceExtensions.size());
-	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+	u32 deviceExtensionCount = 0;
+	const char **deviceExtensionNames = glfwGetRequiredInstanceExtensions(&deviceExtensionCount);
+
+	deviceCreateInfo.enabledExtensionCount = deviceExtensionCount;
+	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionNames;
 
 	VK_CHECK_RESULT(vkCreateDevice(pPhysicalDevice.GetVkNative(), &deviceCreateInfo, nullptr, &pVkDevice));
 
@@ -63,6 +67,7 @@ void Device::Create()
 	{
 		throw runtime_error("Failed to get device queue");
 	}
+
 }
 
 void Device::Destroy()

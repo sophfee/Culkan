@@ -7,6 +7,17 @@
 #include <stdexcept>
 #include <set>
 #include <functional>
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <unordered_map>
+#include <array>
+#include <optional>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <chrono>
+#include <thread>
 
 #include "NonCopyable.h"
 
@@ -20,6 +31,11 @@ using s8 = int8_t;
 using s16 = int16_t;
 using s32 = int32_t;
 using s64 = int64_t;
+
+using i8 = char;
+using i16 = short;
+using i32 = int;
+using i64 = long long;
 
 using u8 = uint8_t;
 using u16 = uint16_t;
@@ -96,7 +112,7 @@ Vec<T> Enumerate(Func<R(uint32_t *, T *)> enumerateFunction)
 }
 
 #define GENERATE_ENUMERATE_FUNCTION(name, type, result, func, args, call_args, ...)		\
-inline Vec<type> Enumerate##name args {											\
+inline Vec<type> name args {											\
 	return Enumerate<type, result>([__VA_ARGS__](uint32_t *count, type *data)			\
 	{																					\
 		return func call_args;															\
@@ -104,16 +120,22 @@ inline Vec<type> Enumerate##name args {											\
 }
 
 // Generate enumeration functions for Vulkan
-GENERATE_ENUMERATE_FUNCTION(InstanceExtensionProperties, VkExtensionProperties, VkResult, vkEnumerateInstanceExtensionProperties, (), (nullptr, count, data), );
-GENERATE_ENUMERATE_FUNCTION(InstanceLayerProperties, VkLayerProperties, VkResult, vkEnumerateInstanceLayerProperties, (), (count, data), );
-GENERATE_ENUMERATE_FUNCTION(PhysicalDevices, VkPhysicalDevice, VkResult, vkEnumeratePhysicalDevices, (VkInstance instance), (instance, count, data), instance);
-GENERATE_ENUMERATE_FUNCTION(DeviceExtensionProperties, VkExtensionProperties, VkResult, vkEnumerateDeviceExtensionProperties, (VkPhysicalDevice device, const char *layerName), (device, layerName, count, data), device, layerName);
-GENERATE_ENUMERATE_FUNCTION(DeviceLayerProperties, VkLayerProperties, VkResult, vkEnumerateDeviceLayerProperties, (VkPhysicalDevice device), (device, count, data), device);
-GENERATE_ENUMERATE_FUNCTION(QueueFamilyProperties, VkQueueFamilyProperties, void, vkGetPhysicalDeviceQueueFamilyProperties, (VkPhysicalDevice device), (device, count, data), device);
-GENERATE_ENUMERATE_FUNCTION(FormatProperties, VkFormatProperties, void, vkGetPhysicalDeviceFormatProperties, (VkPhysicalDevice device, VkFormat format), (device, format, data), device, format);
-GENERATE_ENUMERATE_FUNCTION(SurfaceFormatsKHR, VkSurfaceFormatKHR, VkResult, vkGetPhysicalDeviceSurfaceFormatsKHR, (VkPhysicalDevice device, VkSurfaceKHR surface), (device, surface, count, data), device, surface);
-GENERATE_ENUMERATE_FUNCTION(PresentModesKHR, VkPresentModeKHR, VkResult, vkGetPhysicalDeviceSurfacePresentModesKHR, (VkPhysicalDevice device, VkSurfaceKHR surface), (device, surface, count, data), device, surface);
+GENERATE_ENUMERATE_FUNCTION(EnumerateInstanceExtensionProperties, VkExtensionProperties, VkResult, vkEnumerateInstanceExtensionProperties, (), (nullptr, count, data), );
+GENERATE_ENUMERATE_FUNCTION(EnumerateInstanceLayerProperties, VkLayerProperties, VkResult, vkEnumerateInstanceLayerProperties, (), (count, data), );
+GENERATE_ENUMERATE_FUNCTION(EnumeratePhysicalDevices, VkPhysicalDevice, VkResult, vkEnumeratePhysicalDevices, (VkInstance instance), (instance, count, data), instance);
+GENERATE_ENUMERATE_FUNCTION(EnumerateDeviceExtensionProperties, VkExtensionProperties, VkResult, vkEnumerateDeviceExtensionProperties, (VkPhysicalDevice device, const char *layerName), (device, layerName, count, data), device, layerName);
+GENERATE_ENUMERATE_FUNCTION(EnumerateDeviceLayerProperties, VkLayerProperties, VkResult, vkEnumerateDeviceLayerProperties, (VkPhysicalDevice device), (device, count, data), device);
+GENERATE_ENUMERATE_FUNCTION(EnumerateQueueFamilyProperties, VkQueueFamilyProperties, void, vkGetPhysicalDeviceQueueFamilyProperties, (VkPhysicalDevice device), (device, count, data), device);
+GENERATE_ENUMERATE_FUNCTION(EnumerateFormatProperties, VkFormatProperties, void, vkGetPhysicalDeviceFormatProperties, (VkPhysicalDevice device, VkFormat format), (device, format, data), device, format);
+GENERATE_ENUMERATE_FUNCTION(EnumerateSurfaceFormatsKHR, VkSurfaceFormatKHR, VkResult, vkGetPhysicalDeviceSurfaceFormatsKHR, (VkPhysicalDevice device, VkSurfaceKHR surface), (device, surface, count, data), device, surface);
+GENERATE_ENUMERATE_FUNCTION(EnumerateSurfacePresentModesKHR, VkPresentModeKHR, VkResult, vkGetPhysicalDeviceSurfacePresentModesKHR, (VkPhysicalDevice device, VkSurfaceKHR surface), (device, surface, count, data), device, surface);
+GENERATE_ENUMERATE_FUNCTION(GetSwapchainImagesKHR, VkImage, VkResult, vkGetSwapchainImagesKHR, (VkDevice device, VkSwapchainKHR swapchain), (device, swapchain, count, data), device, swapchain);
 
+struct SwapChainSupportDetails {
+	VkSurfaceCapabilitiesKHR capabilities;
+	Vec<VkSurfaceFormatKHR> formats;
+	Vec<VkPresentModeKHR> presentModes;
+};
 
 struct QueueFamilyIndices
 {

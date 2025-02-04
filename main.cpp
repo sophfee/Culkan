@@ -29,19 +29,50 @@ Create and destroy a simple Vulkan instance.
 
 #include "Instance.h"
 #include "PhysicalDevice.h"
+#include "Device.h"
+#include "Surface.h"
+#include "SwapChain.h"
+#include "Pipeline.h"
 
 int main()
 {
 	Instance &instance = Singleton<Instance>::GetInstance();
-    instance.AddAllExtensions();
+    //instance.AddAllExtensions();
+	instance.AddRequiredExtensions();
 	instance.Create();
 
-	Vec<Ref<PhysicalDevice >> ppPhysicalDevices = instance.GetPhysicalDevices();
+	Vec<Ref<PhysicalDevice>> ppPhysicalDevices = instance.GetPhysicalDevices();
+	Ref<PhysicalDevice> pPhysicalDevice = ppPhysicalDevices[0];
+	u32 score = 0;
 	for (auto &pPhysicalDevice : ppPhysicalDevices)
 	{
-		VkPhysicalDeviceProperties properties = pPhysicalDevice->GetProperties();
-		cout << "Device Name: " << properties.deviceName << endl;
+		u32 testScore = pPhysicalDevice->RateSuitability();
+		if (score > pPhysicalDevice->RateSuitability())
+		{
+			pPhysicalDevice = pPhysicalDevice;
+			score = testScore;
+		}
 	}
+
+	// Create the device
+	Ref<Device> pDevice = pPhysicalDevice->CreateDevice();
+
+	// Create the surface
+	Ref<Surface> pSurface = make_shared<Surface>(instance);
+	pSurface->Create();
+
+	// Create the swap chain
+	Ref<SwapChain> pSwapChain = make_shared<SwapChain>(*pDevice, *pSurface);
+	pSwapChain->Create();
+
+	// Create the pipeline
+	Ref<Pipeline> pPipeline = make_shared<Pipeline>(*pDevice, *pSurface);
+	pPipeline->Create();
+
+	// Destroy the pipeline
+	pPipeline->Destroy();	
+
+	std::cout << "Physical Device: " << pPhysicalDevice->GetVkNative() << std::endl;
 
     return 0;
 }
